@@ -1,6 +1,6 @@
 ﻿import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
 
-const PARTICLE_COUNT = 7800;
+const PARTICLE_COUNT = 12000;
 const container = document.getElementById("scene-container");
 const colorPicker = document.getElementById("colorPicker");
 const shapeSelect = document.getElementById("shapeSelect");
@@ -84,6 +84,8 @@ let spreadTarget = 1;
 let diffusion = 0.15;
 let diffusionTarget = 0.15;
 let pointer = { x: 0, y: 0 };
+let handOffsetX = 0;
+let handOffsetXTarget = 0;
 
 shapeSelect.addEventListener("change", (event) => {
   setShape(event.target.value);
@@ -126,6 +128,9 @@ function animate(time) {
   camera.position.x += (pointer.x * 40 - camera.position.x) * 0.03;
   camera.position.y += (-pointer.y * 30 - camera.position.y) * 0.03;
   camera.lookAt(0, 0, 0);
+
+  handOffsetX += (handOffsetXTarget - handOffsetX) * 0.1;
+  particles.position.x += (handOffsetX - particles.position.x) * 0.08;
 
   const posAttr = geometry.attributes.position;
   for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -184,15 +189,38 @@ function generateHeart(count) {
 
 function generateFlower(count) {
   return fillBuffer(count, () => {
+    const petals = 6;
     const angle = Math.random() * Math.PI * 2;
-    const petal = Math.sin(angle * 5) * 0.5 + 1.2;
-    const radius = petal * 16 + Math.random() * 2;
-    const y = Math.cos(angle * 2) * 6 + (Math.random() - 0.5) * 4;
-    const z = Math.sin(angle * 3) * 5 + (Math.random() - 0.5) * 5;
+    const swirl = angle + Math.sin(angle * 2.5) * 0.25;
+    const layer = Math.random();
+
+    if (layer < 0.2) {
+      const r = Math.pow(Math.random(), 0.6) * 7;
+      const theta = angle;
+      const budHeight = (1 - r / 7) * 6 + (Math.random() - 0.5) * 1.5;
+      return {
+        x: Math.cos(theta) * r,
+        y: budHeight,
+        z: Math.sin(theta) * r,
+      };
+    }
+
+    if (layer < 0.85) {
+      const petalWave = Math.sin(angle * petals) * 0.5 + 0.5;
+      const radius = 18 + petalWave * 14 + Math.random() * 4;
+      const curl = Math.cos(angle * 0.5) * 5;
+      return {
+        x: Math.cos(swirl) * radius,
+        y: curl + petalWave * 8 + (Math.random() - 0.5) * 3,
+        z: Math.sin(swirl) * radius + Math.sin(angle * petals * 0.5) * 4,
+      };
+    }
+
+    const haloRadius = 32 + Math.random() * 10;
     return {
-      x: Math.cos(angle) * radius,
-      y,
-      z,
+      x: Math.cos(angle) * haloRadius,
+      y: -8 + (Math.random() - 0.5) * 6,
+      z: Math.sin(angle) * haloRadius + Math.cos(angle * petals) * 4,
     };
   });
 }
@@ -312,6 +340,7 @@ function initHandTracking() {
     locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
   });
   hands.setOptions({
+    selfieMode: true,
     maxNumHands: 2,
     modelComplexity: 1,
     minDetectionConfidence: 0.65,
@@ -344,19 +373,24 @@ function handleGestureResults(results) {
   if (!handCount) {
     spreadTarget = 0.65;
     diffusionTarget = 0.15;
+    handOffsetXTarget = 0;
     gestureStatus.textContent = "请将双手进入画面";
     return;
   }
 
   let opennessTotal = 0;
+  let horizontalTotal = 0;
   for (const hand of results.multiHandLandmarks) {
     opennessTotal += calcHandOpenness(hand);
+    horizontalTotal += calcHandHorizontal(hand);
   }
   const averageOpenness = opennessTotal / handCount;
+  const horizontalAverage = horizontalTotal / handCount;
   const opennessNormalized = THREE.MathUtils.clamp((averageOpenness - 0.25) / 1.05, 0, 1);
   const spreadCurve = Math.pow(opennessNormalized, 1.1);
-  spreadTarget = THREE.MathUtils.clamp(0.5 + spreadCurve * 2.6, 0.5, 3.2);
-  diffusionTarget = THREE.MathUtils.clamp(0.05 + opennessNormalized * 1.15, 0.05, 1.2);
+  handOffsetXTarget = THREE.MathUtils.clamp(horizontalAverage * 120, -110, 110);
+  spreadTarget = THREE.MathUtils.clamp(0.45 + spreadCurve * 3.4, 0.45, 3.8);
+  diffusionTarget = THREE.MathUtils.clamp(0.06 + opennessNormalized * 1.35, 0.06, 1.45);
 
   const mode = opennessNormalized > 0.55 ? "扩散" : "聚拢";
   gestureStatus.textContent = `${handCount === 2 ? "双手" : "单手"}${mode} ×${spreadTarget.toFixed(2)}`;
@@ -370,6 +404,11 @@ function calcHandOpenness(handLandmarks) {
   const distancePalm = distance3d(wrist, middle);
   const distancePinch = distance3d(thumbTip, indexTip);
   return distancePinch / distancePalm;
+}
+
+function calcHandHorizontal(handLandmarks) {
+  const palmCenter = handLandmarks[9];
+  return (0.5 - palmCenter.x) * 2;
 }
 
 function distance3d(a, b) {
