@@ -1,0 +1,23 @@
+﻿# Dependency directories
+node_modules/
+bower_components/
+
+# Build outputs / caches
+dist/
+.tmp/
+.cache/
+coverage/
+
+# Editor & OS noise
+.DS_Store
+Thumbs.db
+*.log
+*.local
+.env
+.env.*
+
+# VS Code / extensions history
+.history/
+
+# Static server temp files
+*.pid
