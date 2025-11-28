@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>粒子手势花园</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="scene-container"></div>
+    <video id="input-video" autoplay playsinline muted></video>
+
+    <div class="ui-shell">
+      <div class="panel">
+        <header>
+          <h1>粒子手势花园</h1>
+          <p>张开/握紧双手来扩散或收拢粒子</p>
+        </header>
+        <div class="control">
+          <label for="shapeSelect">模型</label>
+          <select id="shapeSelect">
+            <option value="heart">爱心</option>
+            <option value="flower">花朵</option>
+            <option value="saturn">土星</option>
+            <option value="buddha">佛像</option>
+            <option value="firework">烟花</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="colorPicker">粒子颜色</label>
+          <input id="colorPicker" type="color" value="#ff82c1" />
+        </div>
+        <div class="feedback">
+          <span id="gestureStatus">等待摄像头授权...</span>
+        </div>
+      </div>
+      <button id="fullscreenBtn" title="全屏模式">⛶</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
