@@ -1,50 +1,50 @@
 ﻿<!DOCTYPE html>
-<html lang="zh">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>粒子手势花园</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./styles.css" />
-  </head>
-  <body>
-    <div id="scene-container"></div>
-    <video id="input-video" autoplay playsinline muted></video>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js 手势交互粒子系统</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    <div class="ui-shell">
-      <div class="panel">
-        <header>
-          <h1>粒子手势花园</h1>
-          <p>张开/握紧双手来扩散或收拢粒子</p>
-        </header>
-        <div class="control">
-          <label for="shapeSelect">模型</label>
-          <select id="shapeSelect">
-            <option value="heart">爱心</option>
-            <option value="flower">花朵</option>
-            <option value="saturn">土星</option>
-            <option value="buddha">佛像</option>
-            <option value="firework">烟花</option>
-          </select>
+    <video id="input_video"></video>
+
+    <div id="loader">正在启动摄像头与AI模型...</div>
+
+    <div id="ui-container">
+        <h2>粒子控制台</h2>
+        
+        <div class="control-group">
+            <label>模型选择</label>
+            <div class="shape-grid">
+                <button onclick="morphTo('heart')" class="active">爱心</button>
+                <button onclick="morphTo('sphere')">球体 (土星)</button>
+                <button onclick="morphTo('torus')">佛像 (抽象)</button>
+                <button onclick="morphTo('flower')">花朵</button>
+                <button onclick="morphTo('fireworks')">烟花散落</button>
+            </div>
         </div>
-        <div class="control">
-          <label for="colorPicker">粒子颜色</label>
-          <input id="colorPicker" type="color" value="#ff82c1" />
+
+        <div class="control-group">
+            <label>粒子颜色</label>
+            <input type="color" id="colorPicker" value="#00ffaa">
         </div>
-        <div class="feedback">
-          <span id="gestureStatus">等待摄像头授权...</span>
+
+        <div class="control-group">
+            <label>手势状态 (需摄像头)</label>
+            <div id="gesture-val">未检测到手部</div>
+            <div id="status">● 等待摄像头权限...</div>
         </div>
-      </div>
-      <button id="fullscreenBtn" title="全屏模式">⛶</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-    <script type="module" src="./main.js"></script>
-  </body>
+    <button id="fullscreen-btn" onclick="toggleFullScreen()">⛶ 全屏模式</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <script src="script.js"></script>
+</body>
 </html>
